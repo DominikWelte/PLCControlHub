@@ -8,6 +8,7 @@ from django.views import View
 global_value_buffer = []
 stop_thread_logging_worker = False
 
+
 class PLCConnect(View):
 
     def __init__(self, **kwargs):
