@@ -27,4 +27,4 @@ class Project(models.Model):
     connectionparameters = ForeignKey(Connectionparameters, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.projectnumber}"
+        return f"{self.name} {self.projectnumber}"

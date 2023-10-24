@@ -173,6 +173,7 @@ def connect_to_plc_view(request):
     try:
         plc = pyads.Connection(amsnet_id, port, ip_adresse)
         plc.open()
+        infotext = "connection to PLC established"
     except pyads.ADSError as e:
         infotext = f"{e}"
     except ValueError as e:
