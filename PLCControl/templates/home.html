@@ -13,14 +13,24 @@
 <body>
     <form method="post">
         {% csrf_token %}
-        {{ form.Projektname.label_tag }} {{ form.Projektname }}
+        {{ form.Projectname.label_tag }} {{ form.Projectname }}
         {{ form.Projectnumber.label_tag }} {{ form.Projectnumber }}
         {{ form.AMSnetID.label_tag }} {{ form.AMSnetID }}
         {{ form.IP.label_tag }} {{ form.IP }}
         {{ form.port.label_tag }} {{ form.port }}
         {{ form.variable.label_tag }} {{ form.variable }}
-        <button type="submit" id="connect" name="connect">Verbinden</button>
+        <button type="submit" id="add" name="add">Add project</button>
+        {% if back %}
+             <button type="button" id="back" name="back" onclick="window.location.href = '{% url 'home' %}';">Back</button>
+        {% endif %}
     </form>
-
+{% if connect %}
+    <form method="get">
+        <div>
+            {{ myFilter.form.as_table }}
+            <button type="submit" id="connect" name="connect">Connect</button>
+        </div>
+    </form>
+    {% endif %}
 </body>
 </html>

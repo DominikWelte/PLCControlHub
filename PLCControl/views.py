@@ -5,6 +5,7 @@ import time
 from django.views import View
 from .forms import ConnectPLCform
 from .models import Project, Connectionparameters, Variables
+from .filters import ProjectFilter
 
 global_value_buffer = []
 stop_thread_logging_worker = False
@@ -30,13 +31,12 @@ class PLCConnect(View):
         value_buffer = []
         plc_dict = {}
         try:
-            if "connect" in request.GET:
-                plc_dict = self.get_plc_dict(request)
-                self.plc = pyads.Connection(self.AMSnetID, self.port, self.IP)
-                self.plc.open()
-                self.value = self.plc.read_by_name(self.variable)
-                self.infotext = "connection to PLC established"
-                self.status = "Connected to Beckhoff PLC"
+            plc_dict = self.get_plc_dict(request)
+            self.plc = pyads.Connection(self.AMSnetID, self.port, self.IP)
+            self.plc.open()
+            self.value = self.plc.read_by_name(self.variable)
+            self.infotext = "connection to PLC established"
+            self.status = "Connected to Beckhoff PLC"
             if "update" in request.GET:
                 self.value = self.plc.read_by_name(self.variable)
             global stop_thread_logging_worker
@@ -115,26 +115,43 @@ def remove_whitespace_from_string(string):
 
 
 def home_view(request):
+    connect = True
+    back = False
     if request.method == 'POST':
+        if "add" in request.POST:
+            back = True
         form = ConnectPLCform(request.POST)
         if form.is_valid():
-            projectname = remove_whitespace_from_string(form.cleaned_data['Projektname'])
+            projectname = remove_whitespace_from_string(form.cleaned_data['Projectname'])
             projectnumber = form.cleaned_data['Projectnumber']
             amsnet_id = remove_whitespace_from_string(form.cleaned_data['AMSnetID'])
             ip_adresse = remove_whitespace_from_string(form.cleaned_data['IP'])
             port = form.cleaned_data['port']
             variable = remove_whitespace_from_string(form.cleaned_data['variable'])
-            connection, created = Connectionparameters.objects.get_or_create(amsnet_id=amsnet_id, ip_adresse=ip_adresse, port=port)
-            variable_obj, created = Variables.objects.get_or_create(variable=variable)
-            project = Project.objects.create(
-                name=projectname,
-                projectnumber=projectnumber,
-                amsnet_id=connection,
-            )
-            project.amsnet_id.variables.add(variable_obj.id)
-            return redirect("plcconnect")
+            connection, created_connection = Connectionparameters.objects.get_or_create(amsnet_id=amsnet_id, ip_adresse=ip_adresse, port=port)
+            variable_obj, created_variable = Variables.objects.get_or_create(variable=variable)
+            if created_connection:
+                project = Project.objects.create(
+                    name=projectname,
+                    projectnumber=projectnumber,
+                    amsnet_id=connection,
+                )
+            if created_variable:
+                project.amsnet_id.variables.add(variable_obj.id)
+            return redirect("home")
+    elif request.method == "GET":
+        data = Project.objects.all()
+        myFilter = ProjectFilter(request.GET, queryset=data)
+        context = {
+            "myFilter": myFilter,
+            "connect": connect,
+        }
+        return render(request, "home.html", context)
     else:
         form = ConnectPLCform()
-
-    return render(request, 'home.html', {'form': form})
+    connect = False
+    context = {'form': form,
+               'connect': connect,
+               'back': back}
+    return render(request, 'home.html', context=context)
 

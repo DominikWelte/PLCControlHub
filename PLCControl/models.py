@@ -24,3 +24,6 @@ class Project(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(99999)]
     )
     amsnet_id = ForeignKey(Connectionparameters, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.projectnumber}"
