@@ -18,12 +18,13 @@ class Connectionparameters(models.Model):
         validators=[MinLengthValidator(3), MaxLengthValidator(3)])
 
 
+
 class Project(models.Model):
     name = models.CharField(max_length=100)
     projectnumber = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(99999)]
     )
-    amsnet_id = ForeignKey(Connectionparameters, on_delete=models.CASCADE)
+    connectionparameters = ForeignKey(Connectionparameters, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.projectnumber}"

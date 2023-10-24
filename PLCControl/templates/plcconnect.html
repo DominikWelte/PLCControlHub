@@ -58,13 +58,17 @@
 </head>
 <body>
     <header>
-        {% if status %}
-            <h1 style="background-color: green; color: white;" >{{ status }}</h1>
-        {% else %}
             <h1>Connect to Beckhoff PLC</h1>
-        {% endif %}
     </header>
-    <h1>SUCCESS</h1>
+    <h1>Connection parameters for plc:</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {% for key, value in plc_dict.items %}
+                            <li>{{ key }}: {{ value }}</li>
+                        {% endfor %}
+        <input type="hidden" name="project_id" id="project_id" value="{{ id }}">
+        <button type="submit" id="to_plc" name="to_plc">Connect to PLC</button>
+    </form>
     <!--div>
         <div id="infobox">
             From TwinCAT Edit Routes, enter the AMS Net ID and the IP of the target system.

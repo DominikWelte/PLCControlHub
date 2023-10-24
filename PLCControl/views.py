@@ -3,7 +3,7 @@ import pyads
 import threading
 import time
 from django.views import View
-from .forms import ConnectPLCform
+from .forms import GetPLCConnectionValuesForm
 from .models import Project, Connectionparameters, Variables
 from .filters import ProjectFilter
 
@@ -31,7 +31,6 @@ class PLCConnect(View):
         value_buffer = []
         plc_dict = {}
         try:
-            plc_dict = self.get_plc_dict(request)
             self.plc = pyads.Connection(self.AMSnetID, self.port, self.IP)
             self.plc.open()
             self.value = self.plc.read_by_name(self.variable)
@@ -95,19 +94,6 @@ class PLCConnect(View):
                 if stop_thread_logging_worker:
                     break
 
-    def get_plc_dict(self, request):
-        self.AMSnetID = request.GET.get("AMSnetID")
-        self.AMSnetID = self.remove_whitespace_from_string(self.AMSnetID)
-        self.IP = request.GET.get("IP")
-        self.IP = self.remove_whitespace_from_string(self.IP)
-        self.port = int(request.GET.get("port"))
-        self.variable = request.GET.get("variable")
-        self.variable = self.remove_whitespace_from_string(self.variable)
-        plc_dict = {"AMSnetID": self.AMSnetID,
-                    "IP": self.IP,
-                    "port": self.port,
-                    "variable": self.variable}
-        return plc_dict
 
 def remove_whitespace_from_string(string):
     string = string.replace(" ", "")
@@ -118,9 +104,12 @@ def home_view(request):
     connect = True
     back = False
     if request.method == 'POST':
+        if "to_plc" in request.POST:
+            context = connect_to_plc_view(request)
+            return render(request, "plcconnected.html", context=context)
         if "add" in request.POST:
             back = True
-        form = ConnectPLCform(request.POST)
+        form = GetPLCConnectionValuesForm(request.POST)
         if form.is_valid():
             projectname = remove_whitespace_from_string(form.cleaned_data['Projectname'])
             projectnumber = form.cleaned_data['Projectnumber']
@@ -134,10 +123,10 @@ def home_view(request):
                 project = Project.objects.create(
                     name=projectname,
                     projectnumber=projectnumber,
-                    amsnet_id=connection,
+                    connectionparameters=connection,
                 )
             if created_variable:
-                project.amsnet_id.variables.add(variable_obj.id)
+                project.connectionparameters.variables.add(variable_obj.id)
             return redirect("home")
     elif request.method == "GET":
         data = Project.objects.all()
@@ -146,12 +135,52 @@ def home_view(request):
             "myFilter": myFilter,
             "connect": connect,
         }
+        ID = request.GET.get("projectnumber")
+        if "connect" in request.GET and ID:
+            plc_dict = get_connection_parameters_for_plc(ID=ID)
+            context = {"plc_dict": plc_dict,
+                       "id": ID}
+            return render(request, "plcconnect.html", context=context)
         return render(request, "home.html", context)
     else:
-        form = ConnectPLCform()
+        form = GetPLCConnectionValuesForm()
     connect = False
     context = {'form': form,
                'connect': connect,
                'back': back}
     return render(request, 'home.html', context=context)
 
+
+def get_connection_parameters_for_plc(ID):
+    project = Project.objects.select_related('connectionparameters').get(id=ID)
+    amsnet_id = project.connectionparameters.amsnet_id
+    ip_adresse = project.connectionparameters.ip_adresse
+    port = project.connectionparameters.port
+    connect_dict = {
+        "amsnet_id": amsnet_id,
+        "ip_adresse": ip_adresse,
+        "port": port,
+    }
+    return connect_dict
+
+
+def connect_to_plc_view(request):
+    ID = request.POST.get("project_id")
+    connect_dict = get_connection_parameters_for_plc(ID)
+    amsnet_id = connect_dict["amsnet_id"]
+    ip_adresse = connect_dict["ip_adresse"]
+    port = connect_dict["port"]
+    try:
+        plc = pyads.Connection(amsnet_id, port, ip_adresse)
+        plc.open()
+    except pyads.ADSError as e:
+        infotext = f"{e}"
+    except ValueError as e:
+        infotext = f"connection to PLC failed with error {e}"
+    except TypeError as e:
+        infotext = f"connection to PLC failed with error {e}"
+    context = {
+        "infotext": infotext,
+    }
+    #return render(request, "plcconnected.html", context=context)
+    return context
