@@ -1,7 +1,7 @@
 from django import forms
 
 class GetPLCConnectionValuesForm(forms.Form):
-    Projectname = forms.CharField(label='Projectname', max_length=100, required=True)
+    PLC_Name = forms.CharField(label='PLC_Name', max_length=100, required=True)
     Projectnumber = forms.IntegerField(label='Projectnumber', required=True)
     AMSnetID = forms.CharField(label='Insert AMSnetID', max_length=100, required=True)
     IP = forms.CharField(label='Insert IP of the PLC', required=True)

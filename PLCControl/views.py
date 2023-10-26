@@ -111,7 +111,7 @@ def home_view(request):
             back = True
         form = GetPLCConnectionValuesForm(request.POST)
         if form.is_valid():
-            projectname = remove_whitespace_from_string(form.cleaned_data['Projectname'])
+            PLC_Name = remove_whitespace_from_string(form.cleaned_data['PLC_Name'])
             projectnumber = form.cleaned_data['Projectnumber']
             amsnet_id = remove_whitespace_from_string(form.cleaned_data['AMSnetID'])
             ip_adresse = remove_whitespace_from_string(form.cleaned_data['IP'])
@@ -121,7 +121,7 @@ def home_view(request):
             variable_obj, created_variable = Variables.objects.get_or_create(variable=variable)
             if created_connection:
                 project = Project.objects.create(
-                    name=projectname,
+                    name=PLC_Name,
                     projectnumber=projectnumber,
                     connectionparameters=connection,
                 )

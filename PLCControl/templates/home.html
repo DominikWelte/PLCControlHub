@@ -13,7 +13,7 @@
 <body>
     <form method="post">
         {% csrf_token %}
-        {{ form.Projectname.label_tag }} {{ form.Projectname }}
+        {{ form.PLC_Name.label_tag }} {{ form.PLC_Name }}
         {{ form.Projectnumber.label_tag }} {{ form.Projectnumber }}
         {{ form.AMSnetID.label_tag }} {{ form.AMSnetID }}
         {{ form.IP.label_tag }} {{ form.IP }}
