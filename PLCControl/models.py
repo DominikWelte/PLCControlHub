@@ -10,6 +10,7 @@ class Variables(models.Model):
     def __str__(self):
         return self.variable
 
+
 class Connectionparameters(models.Model):
     amsnet_id = models.CharField(max_length=100)
     ip_adresse = models.CharField(max_length=100)
@@ -18,7 +19,7 @@ class Connectionparameters(models.Model):
         validators=[MinLengthValidator(3), MaxLengthValidator(3)])
 
     def __str__(self):
-        return f"AMSnedid = {self.amsnet_id}"
+        return f"AMSnetID = {self.amsnet_id}"
 
 
 class Project(models.Model):

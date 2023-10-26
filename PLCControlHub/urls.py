@@ -16,11 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from PLCControl.views import PLCConnect, home_view, connect_to_plc_view
+from PLCControl.views import home_view, Connect
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('plcconnect/', PLCConnect.as_view(), name="plcconnect"),
     path('', home_view, name="home"),
-    path('plcconnected/', connect_to_plc_view, name="plcconnected")
+    path('plcconnected/<int:id>/', Connect.connect_to_plc_view, name="plcconnected")
 ]

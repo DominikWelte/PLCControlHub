@@ -63,70 +63,11 @@
     <h1>Connection parameters for plc:</h1>
     <form method="POST">
         {% csrf_token %}
-        {% for key, value in plc_dict.items %}
+        {% for key, value in connect_dict.items %}
                             <li>{{ key }}: {{ value }}</li>
                         {% endfor %}
-        <input type="hidden" name="project_id" id="project_id" value="{{ id }}">
-        <button type="submit" id="to_plc" name="to_plc">Connect to PLC</button>
+        <a href="{% url 'plcconnected' id=id %}" >Connect to PLC</a>
+        <button type="button" id="back" name="back" onclick="window.location.href = '{% url 'home' %}';">Back</button>
     </form>
-    <!--div>
-        <div id="infobox">
-            From TwinCAT Edit Routes, enter the AMS Net ID and the IP of the target system.
-        </div>
-        <form method="GET">
-            {% if plc_dict %}
-                <h3 style="color: green;">Connected to the following PLC: </h3>
-                    <ul>
-                        {% for key, value in plc_dict.items %}
-                            <li>{{ key }}: {{ value }}</li>
-                        {% endfor %}
-                    </ul>
-            {% else %}
-                <label for="AMSnetID">Insert AMSnetID:</label>
-                <input type="text" id="AMSnetID" name="AMSnetID" required><br>
-                <label for="IP">Insert IP of the PLC:</label>
-                <input type="text" id="IP" name="IP" required><br>
-                <label for="port">Insert Port of the PLC:</label>
-                <input type="number" id="port" name="port" required><br>
-                <label for="variable">Insert variable to be read:</label>
-                <input type="text" id="variable" name="variable" required><br>
-            {% endif %}
-            {% if not plc_dict %}
-                <button type="submit" id="connect" name="connect">Connect to PLC</button>
-            {% else %}
-                <button type="submit" id="update" name="update">Update Varaible</button>
-            {% endif %}
-            {% if logging %}
-                <button type="submit" id="logging_stop" name="logging_stop" >Stop logging</button>
-            {% else %}
-                <button type="submit" id="logging_start" name="logging_start" >Start logging</button>
-            {% endif %}
-        </form>
-    </div>
-    {% if logging %}
-        Value of the asked Variable: {{ variable }}:
-        {{ value }}<br>
-        Infotext:
-        {{ infotext | safe }}<br>
-        <h3 style="color: red;">Logging started</h3>
-    {% elif value %}
-    <div id="value">
-        Value of the asked Variable: {{ variable }}:
-        {{ value }}<br>
-        Infotext:
-        {{ infotext | safe }}
-    </div>
-    {% endif %}
-    {% if value_buffer %}
-    <div id="value_buffer">
-        {% for item in value_buffer %}
-            Timestamp:      {{ item.0 }}<br>
-            Variablename:   {{ item.1 }}<br>
-            Value:          {{ item.2 }}<br>
-            <br><br>
-        {% endfor %}
-    </div>
-    {% endif %}-->
-
 </body>
 </html>

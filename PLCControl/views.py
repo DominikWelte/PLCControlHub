@@ -104,9 +104,6 @@ def home_view(request):
     connect = True
     back = False
     if request.method == 'POST':
-        if "to_plc" in request.POST:
-            context = connect_to_plc_view(request)
-            return render(request, "plcconnected.html", context=context)
         if "add" in request.POST:
             back = True
         form = GetPLCConnectionValuesForm(request.POST)
@@ -121,12 +118,12 @@ def home_view(request):
             variable_obj, created_variable = Variables.objects.get_or_create(variable=variable)
             if created_connection:
                 project = Project.objects.create(
-                    name=PLC_Name,
+                    PLC_Name=PLC_Name,
                     projectnumber=projectnumber,
                     connectionparameters=connection,
                 )
-            if created_variable:
-                project.connectionparameters.variables.add(variable_obj.id)
+                if created_variable:
+                    project.connectionparameters.variables.add(variable_obj.id)
             return redirect("home")
     elif request.method == "GET":
         data = Project.objects.all()
@@ -135,11 +132,11 @@ def home_view(request):
             "myFilter": myFilter,
             "connect": connect,
         }
-        ID = request.GET.get("projectnumber")
-        if "connect" in request.GET and ID:
-            plc_dict = get_connection_parameters_for_plc(ID=ID)
-            context = {"plc_dict": plc_dict,
-                       "id": ID}
+        id = request.GET.get("projectnumber")
+        if "connect" in request.GET and id:
+            connect_dict = get_connection_parameters_for_plc(id=id)
+            context = {"connect_dict": connect_dict,
+                       "id": id}
             return render(request, "plcconnect.html", context=context)
         return render(request, "home.html", context)
     else:
@@ -151,8 +148,8 @@ def home_view(request):
     return render(request, 'home.html', context=context)
 
 
-def get_connection_parameters_for_plc(ID):
-    project = Project.objects.select_related('connectionparameters').get(id=ID)
+def get_connection_parameters_for_plc(id):
+    project = Project.objects.select_related('connectionparameters').get(id=id)
     amsnet_id = project.connectionparameters.amsnet_id
     ip_adresse = project.connectionparameters.ip_adresse
     port = project.connectionparameters.port
@@ -164,24 +161,28 @@ def get_connection_parameters_for_plc(ID):
     return connect_dict
 
 
-def connect_to_plc_view(request):
-    ID = request.POST.get("project_id")
-    connect_dict = get_connection_parameters_for_plc(ID)
-    amsnet_id = connect_dict["amsnet_id"]
-    ip_adresse = connect_dict["ip_adresse"]
-    port = connect_dict["port"]
-    try:
-        plc = pyads.Connection(amsnet_id, port, ip_adresse)
-        plc.open()
-        infotext = "connection to PLC established"
-    except pyads.ADSError as e:
-        infotext = f"{e}"
-    except ValueError as e:
-        infotext = f"connection to PLC failed with error {e}"
-    except TypeError as e:
-        infotext = f"connection to PLC failed with error {e}"
-    context = {
-        "infotext": infotext,
-    }
-    #return render(request, "plcconnected.html", context=context)
-    return context
+class Connect(View):
+
+    def __init__(self, **kwargs):
+        super().__init__(self, **kwargs)
+
+    @staticmethod
+    def connect_to_plc_view(request, id):
+        connect_dict = get_connection_parameters_for_plc(id)
+        amsnet_id = connect_dict["amsnet_id"]
+        ip_adresse = connect_dict["ip_adresse"]
+        port = connect_dict["port"]
+        try:
+            plc = pyads.Connection(amsnet_id, port, ip_adresse)
+            plc.open()
+            infotext = "connection to PLC established"
+        except pyads.ADSError as e:
+            infotext = f"{e}"
+        except ValueError as e:
+            infotext = f"connection to PLC failed with error {e}"
+        except TypeError as e:
+            infotext = f"connection to PLC failed with error {e}"
+        context = {
+            "infotext": infotext,
+        }
+        return render(request, "plcconnected.html", context=context)
