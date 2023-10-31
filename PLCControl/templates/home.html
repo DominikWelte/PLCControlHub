@@ -18,7 +18,6 @@
         {{ form.AMSnetID.label_tag }} {{ form.AMSnetID }}
         {{ form.IP.label_tag }} {{ form.IP }}
         {{ form.port.label_tag }} {{ form.port }}
-        {{ form.variable.label_tag }} {{ form.variable }}
         <button type="submit" id="add" name="add">Add project</button>
         {% if back %}
              <button type="button" id="back" name="back" onclick="window.location.href = '{% url 'home' %}';">Back</button>

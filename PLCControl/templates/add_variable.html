@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add_variable</title>
+</head>
+<body>
+    {% if filter %}
+    <form method="get" autocomplete="off">
+        {{ myFilter.form.as_p }}<br>
+        <button type="submit" id = "search" name="search">Search</button><br><br>
+        {% if myFilter.is_bound %}
+            <a href="{% url 'add_variable' id=id %}">Clear search</a><br>
+        {% endif %}
+        <br>
+        <div>
+        <p>Choose variables to connect and click "Submit"</p><br>
+        {% if variables_for_project %}
+            {% for variable in variables_for_project %}
+            <input type="checkbox" id= "{{ variable }}" name="{{ variable }}" value="selected">
+                {{ variable }}
+            {% endfor %}
+            <br><br><button type="submit">Submit</button>
+        {% else %}
+            <div>
+                <p style="color: red;"> No variable was found for the project. Maybe you have a typingerror in the filter if it was used</p>
+            </div><br>
+        {% endif %}
+        </div>
+    </form>
+    {% endif %}
+    <br><br>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.variable.label_tag }} {{ form.variable }}
+        <button type="submit">Add Variable</button>
+    </form>
+</body>
+</html>
